@@ -13,29 +13,28 @@ class RocketChatPlugin extends Plugin {
 	
 	function onTicketCreated($ticket){		
 		try {			
-			global $ost;		
+			global $ost;
+            $ticketLink = $ost->getConfig()->getUrl() . 'scp/tickets.php?id=' . $ticket->getId();
+            $title      = $ticket->getSubject() ?: 'No subject';
 			$payload = array(
-						'attachments' =>
-							array (
-								array (	
-									'pretext' => "New Ticket <" . $ost->getConfig()->getUrl() . "scp/tickets.php?id=" 
-												. $ticket->getId() . "|#" . $ticket->getNumber() . "> created",
-									'fallback' => "New Ticket <" . $ost->getConfig()->getUrl() . "scp/tickets.php?id=" 
-												. $ticket->getId() . "|#" . $ticket->getNumber() . "> created",
-									'color' => "#D00000",
-									'fields' => 
-									array(
-										array (
-											'title' => $ticket->getSubject(),
-											'value' => "created by " . $ticket->getName() . "(" . $ticket->getEmail() 
-														. ") in " . $ticket->getDeptName() . "(Department) via " 
-														. $ticket->getSource(),
-											'short' => False,
-										),											
-									),
-								),
-							),
-						);
+				'attachments' => 
+                    array(
+                        array(
+                            'title' => 'New Ticket #' . $ticket->getNumber(),
+                            'title_link' => $ticketLink,
+                            'color' => "#D00000",
+				            'fields' => 
+				            array(
+                                array (
+                                    'value' => "created by " . $ticket->getName() . "(" . $ticket->getEmail() 
+                                                    . ") in " . $ticket->getDeptName() . "(Department) via " 
+                                                    . $ticket->getSource(),
+                                    'short' => False,
+                                ),											
+				            ),
+                        ),
+                    ),
+				);
 						
 			$data_string = utf8_encode(json_encode($payload));
 			$url = $this->getConfig()->get('rocketchat-webhook-url');
